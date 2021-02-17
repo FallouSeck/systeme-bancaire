@@ -13,11 +13,8 @@ const findInTheDatabase = (customer_id, _type) => {
 
 async function createBankAccount (req, res) {
     let result;
-
     try {
         result = await findInTheDatabase(req.body.customerId, req.body.type);
-        console.log(req.body.type);
-        console.log(result);
     } catch (error) {
         return res.status(500).send(error);        
     };
@@ -35,14 +32,13 @@ async function createBankAccount (req, res) {
                 return res.status(500).send(error);
             });
         } else {
-            return res.status(400).send(`Customers can only have 1 ${req.body.type}.`); 
+            return res.status(400).send(`Customers can only have 1 ${req.body.type} account.`); 
         };
 }
 
 const getAllBankAccounts = (req, res) => {
     let criteria = {};
     const type = req.query.type;
-    
     if (type === undefined) {
         criteria = {};
     } else {
