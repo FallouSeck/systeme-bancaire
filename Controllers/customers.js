@@ -6,6 +6,7 @@ const createCustomer = (req, res) => {
         lastname: req.body.lastname,
         birthday: req.body.birthday,
         adress: req.body.adress,
+        advisorId: req.body.advisorId,
         creationDate: Date.now()
     })
     return newCustomer.save()
@@ -18,6 +19,13 @@ const createCustomer = (req, res) => {
 }
 
 const getAllCustomers = (req, res) => {
+    /*const city = req.query.adress[0].city;
+    let criteria = {};
+    if (city == undefined) {
+        criteria = { };
+    } else {
+        criteria.city = city ;
+    }*/
     return Customer.find()
     .then((customers) => {
         return res.send(customers);
@@ -30,6 +38,7 @@ const getAllCustomers = (req, res) => {
 const getOneCustomer = (req, res) => {
     const id = req.params.id;
     return Customer.findById(id)
+    .populate('advisorId', 'firstname lastname -_id')
     .then((customer) => {
         return res.send(customer);
     })

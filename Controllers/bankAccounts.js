@@ -56,9 +56,9 @@ const getAllBankAccounts = (req, res) => {
 const getOneBankAccount = (req, res) => {
     const id = req.params.id;
     return BankAccount.findById(id)
-    .populate('customer', 'firstname + lastname -_id')
-    .then((bankAccount) => {
-        return res.send(bankAccount);
+    .populate('customerId')
+    .then((bankAccountFound) => {
+        return res.send(bankAccountFound);
     })
     .catch((error) => {
         return res.status(400).send(error);
