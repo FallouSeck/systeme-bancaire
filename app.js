@@ -6,6 +6,8 @@ const bankAccountsRoutes = require('./Routes/bankAccounts');
 const advisorsRoutes = require('./Routes/advisors');
 const managersRoutes = require('./Routes/managers');
 const directorRoutes = require('./Routes/director');
+const securityAgentRoutes = require('./Routes/securityAgent');
+const securitRoundsRoutes = require('./Routes/securityRounds');
 
 mongoose.connect('mongodb://127.0.0.1/systeme-bancaire', { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false }, (error, db) => {
     if(error) return (error);
@@ -23,6 +25,8 @@ app.use('/bankAccounts', bankAccountsRoutes);
 app.use('/advisors', advisorsRoutes);
 app.use('/managers', managersRoutes);
 app.use('/director', directorRoutes);
+app.use('/securityAgent', securityAgentRoutes);
+app.use('/securityRounds', securitRoundsRoutes);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));

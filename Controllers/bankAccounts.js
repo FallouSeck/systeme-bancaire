@@ -36,7 +36,7 @@ async function createBankAccount (req, res) {
         };
 }
 
-const getAllBankAccounts = (req, res) => {
+const getBankAccounts = (req, res) => {
     let criteria = {};
     const type = req.query.type;
     if (type === undefined) {
@@ -50,7 +50,7 @@ const getAllBankAccounts = (req, res) => {
     })
     .catch((error) => {
         return res.status(400).send(error);
-    });
+    })
 }
 
 const getOneBankAccount = (req, res) => {
@@ -58,11 +58,12 @@ const getOneBankAccount = (req, res) => {
     return BankAccount.findById(id)
     .populate('customerId')
     .then((bankAccountFound) => {
+        console.log(bankAccountFound.customerId);
         return res.send(bankAccountFound);
     })
     .catch((error) => {
         return res.status(400).send(error);
-    });
+    })
 }
 
 const deleteBankAccount = (req, res) => {
@@ -73,11 +74,12 @@ const deleteBankAccount = (req, res) => {
     })
     .catch((error) => {
         return res.status(400).send(error);
-    });
+    })
 }
+
 module.exports = {
     createBankAccount: createBankAccount,
-    getAllBankAccounts: getAllBankAccounts,
+    getBankAccounts: getBankAccounts,
     getOneBankAccount: getOneBankAccount,
     deleteBankAccount: deleteBankAccount
 }

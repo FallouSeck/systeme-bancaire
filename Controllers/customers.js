@@ -18,12 +18,14 @@ const createCustomer = (req, res) => {
     })
 }
 
-const getAllCustomers = (req, res) => {
-    /*const city = req.query.adress[0].city;
-    let criteria = {};
-    if (city == undefined) {
-        criteria = { };
+const getCustomers = (req, res) => {
+    /*let criteria = {};
+    const city = req.query.adress.city;
+    if (city === undefined) {
+        criteria = {};
+        console.log(criteria.city+"-----");
     } else {
+        console.log(criteria.city+"+++");
         criteria.city = city ;
     }*/
     return Customer.find()
@@ -39,8 +41,8 @@ const getOneCustomer = (req, res) => {
     const id = req.params.id;
     return Customer.findById(id)
     .populate('advisorId', 'firstname lastname -_id')
-    .then((customer) => {
-        return res.send(customer);
+    .then((customerFound) => {
+        return res.send(customerFound);
     })
     .catch((error) => {
         return res.status(400).send(error);
@@ -58,10 +60,9 @@ const deleteCustomer = (req, res) => {
     })
 }
 
-
 module.exports = {
     createCustomer: createCustomer,
-    getAllCustomers: getAllCustomers,
+    getCustomers: getCustomers,
     getOneCustomer: getOneCustomer,
     deleteCustomer: deleteCustomer
 }

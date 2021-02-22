@@ -15,7 +15,7 @@ const createManager = (req, res) => {
     })
 }
 
-const getAllManagers = (req, res) => {
+const getManagers = (req, res) => {
     return Manager.find()
     .then((managersFound) => {
         return res.send(managersFound);
@@ -46,7 +46,7 @@ const deleteManager = (req, res) => {
 
 module.exports = {
     createManager: createManager,
-    getAllManagers: getAllManagers,
+    getManagers: getManagers,
     getOneManager: getOneManager,
     deleteManager: deleteManager
 }

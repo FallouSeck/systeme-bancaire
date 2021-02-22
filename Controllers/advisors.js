@@ -16,7 +16,7 @@ const createAdvisor = (req, res) => {
     })
 }
 
-const getAllAdvisors = (req, res) => {
+const getAdvisors = (req, res) => {
     return Advisor.find()
     .then((advisorsFound) => {
         return res.send(advisorsFound);
@@ -50,7 +50,7 @@ const deleteOneAdvisor = (req, res) => {
 }
 module.exports = {
     createAdvisor: createAdvisor,
-    getAllAdvisors: getAllAdvisors,
+    getAdvisors: getAdvisors,
     getOneAdvisor: getOneAdvisor,
     deleteOneAdvisor: deleteOneAdvisor
 }
