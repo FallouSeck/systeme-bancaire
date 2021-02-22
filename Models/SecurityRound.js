@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Schema = require("mongoose");
+const { Schema } = require("mongoose");
 
 const SecurityRoundSchema = new Schema({
     startTime: { type: String, required: true },
