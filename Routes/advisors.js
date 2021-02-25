@@ -6,6 +6,7 @@ const indexController = require('../Controllers/advisors');
 router.post('', indexController.createAdvisor);
 router.get('', indexController.getAdvisors);
 router.get('/:id', indexController.getOneAdvisor);
+router.put('/:id', indexController.putAdvisor);
 router.delete('/:id', indexController.deleteOneAdvisor);
 
 module.exports = router;

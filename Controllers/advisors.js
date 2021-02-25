@@ -38,6 +38,18 @@ const getOneAdvisor = (req, res) => {
     })
 }
 
+const putAdvisor = (req, res) => {
+    const id = req.params.id;
+    const managerId = req.body.managerId;
+    return Advisor.findByIdAndUpdate(id, { managerId: managerId })
+    .then((advisorUpdated) => {
+        return res.send(advisorUpdated);
+    })
+    .catch((error) => {
+        return res.status(400).send(error);
+    })
+}
+
 const deleteOneAdvisor = (req, res) => {
     const id = req.params.id;
     return Advisor.findByIdAndDelete(id)
@@ -52,5 +64,6 @@ module.exports = {
     createAdvisor: createAdvisor,
     getAdvisors: getAdvisors,
     getOneAdvisor: getOneAdvisor,
+    putAdvisor: putAdvisor,
     deleteOneAdvisor: deleteOneAdvisor
 }

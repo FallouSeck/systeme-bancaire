@@ -49,6 +49,22 @@ const getOneCustomer = (req, res) => {
     })
 }
 
+const putCustomer = (req, res) => {
+    const id = req.params.id;
+    const adress = req.body.adress;
+    const advisorId = req.body.advisorId;
+    let criteria = {};
+    if(adress) criteria.adress = adress;
+    if(advisorId) criteria.advisorId = advisorId;
+    return Customer.findByIdAndUpdate(id, criteria)
+    .then((customerUpdated) => {
+        return res.send(customerUpdated);
+    })
+    .catch((error) => {
+        return res.status(400).send(error);
+    })
+}
+
 const deleteCustomer = (req, res) => {
     const id = req.params.id;
     return Customer.findByIdAndDelete(id)
@@ -64,5 +80,6 @@ module.exports = {
     createCustomer: createCustomer,
     getCustomers: getCustomers,
     getOneCustomer: getOneCustomer,
+    putCustomer: putCustomer,    
     deleteCustomer: deleteCustomer
 }
