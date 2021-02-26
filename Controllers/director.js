@@ -8,7 +8,7 @@ const createDirector = (req, res) => {
     })
     newDirector.save()
     .then((newDirectorCreated) => {
-        return res.send(newDirectorCreated);
+        return res.status(201).send(newDirectorCreated);
     })
     .catch((error) => {
         return res.status(500).send(error);

@@ -9,7 +9,7 @@ const createSecurityRound = (req, res) => {
     })
     newSecurityRound.save()
     .then((newSecurityRoundCreated) => {
-        return res.send(newSecurityRoundCreated);
+        return res.status(201).send(newSecurityRoundCreated);
     })
     .catch((error) => {
         return res.status(500).send(error);

@@ -27,4 +27,34 @@ Avec cette API et postman il faudra :
     2. 2 managers (seul le directeur peut le faire)
     3. 3 conseillers (seule le directeur et un manager peuvent le faire peut le faire)
     4. 2 clients pour chaque conseiller (directeur manager conseiller)
-    5. 1 agent de sécurité (seule le directeur peut le faire)
+    5. 1 agent de sécurité (seul le directeur peut le faire)
+
+
+
+    ajouter
+    // customer 
+        => status (interdit bancaire ou solvable)
+    // bankAccount
+        => montant 
+        => put(montant)
+
+    1.1
+     => le client doit pouvoir modifier le montant de son compte
+     => le client n'a accès qu'à ses comptes(consultation et modification)
+    1.2
+     => le advisor ne doit avoir accès qu'à ses customers
+     (consultations => fiches client, bankAccounts)
+     (création, modification, suppression => fiches client, bankAccounts)
+     => il ne doit avoir aucun accès sur un client d'un autre conseiller(consultation ou action)
+    1.3
+     => le manager ne doit avoir accès qu'à ses advisors
+     (consultations => fiches advisor, customerId + toutes actions du advisor)
+     (création, modification, suppression => fiches advisor, customerId + toute action du advisor)
+     => il ne doit avoir aucun accès sur un advisor, customer ou bankAccount d'un autre manager(consultation ou action)
+    1.4
+     => le director peut tout faire à tout le monde(consultation, action)
+    1.5
+     => seul le directeur a acces sur le securityAgent(consultation, action)
+    1.6
+     => seul le securityAgent a acces a la création des securityRounds
+     => seul le director et le securityAgent ont accès à la consultation des securityRounds

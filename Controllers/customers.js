@@ -6,12 +6,13 @@ const createCustomer = (req, res) => {
         lastname: req.body.lastname,
         birthday: req.body.birthday,
         adress: req.body.adress,
+        status: req.body.status,
         advisorId: req.body.advisorId,
         creationDate: Date.now()
     })
     return newCustomer.save()
     .then((savedCustomer) => {
-        return res.send(savedCustomer);
+        return res.status(201).send(savedCustomer);
     })
     .catch((error) => {
         return res.status(500).send(error);
@@ -58,7 +59,7 @@ const putCustomer = (req, res) => {
     if(advisorId) criteria.advisorId = advisorId;
     return Customer.findByIdAndUpdate(id, criteria)
     .then((customerUpdated) => {
-        return res.send(customerUpdated);
+        return res.status(201).send(customerUpdated);
     })
     .catch((error) => {
         return res.status(400).send(error);

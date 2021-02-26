@@ -8,7 +8,7 @@ const createManager = (req, res) => {
     })
     newManager.save()
     .then((newManagerCreated) => {
-        return res.send(newManagerCreated);
+        return res.status(201).send(newManagerCreated);
     })
     .catch((error) => {
         return res.status(500).send(error);

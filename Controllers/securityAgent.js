@@ -8,7 +8,7 @@ const createSecurityAgent = (req, res) => {
     })
     return newSecurityAgent.save()
     .then((createdSecurityAgent) => {
-        return res.send(createdSecurityAgent);
+        return res.status(201).send(createdSecurityAgent);
     })
     .catch((error) => {
         return res.status(500).send(error);

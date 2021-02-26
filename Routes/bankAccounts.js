@@ -6,6 +6,7 @@ const indexController = require('../Controllers/bankAccounts');
 router.post('', indexController.createBankAccount);
 router.get('', indexController.getBankAccounts);
 router.get('/:id', indexController.getOneBankAccount);
+router.put('/:id', indexController.putBankAccount);
 router.delete('/:id', indexController.deleteBankAccount);
 
 module.exports = router;

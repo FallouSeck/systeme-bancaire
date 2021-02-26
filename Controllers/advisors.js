@@ -9,7 +9,7 @@ const createAdvisor = (req, res) => {
     })
     newAdvisor.save()
     .then((newAdvisorCreated) => {
-        return res.send(newAdvisorCreated);
+        return res.status(201).send(newAdvisorCreated);
     })
     .catch((error) => {
         return res.status(500).send(error);
@@ -43,7 +43,7 @@ const putAdvisor = (req, res) => {
     const managerId = req.body.managerId;
     return Advisor.findByIdAndUpdate(id, { managerId: managerId })
     .then((advisorUpdated) => {
-        return res.send(advisorUpdated);
+        return res.status(201).send(advisorUpdated);
     })
     .catch((error) => {
         return res.status(400).send(error);
