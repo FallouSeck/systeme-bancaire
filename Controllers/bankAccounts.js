@@ -1,4 +1,6 @@
 const BankAccount = require('../Models/BankAccount');
+const Customer = require('../Models/Customer');
+
 
 const findInTheDatabase = (customer_id, _type) => {
         return BankAccount.findOne({type: _type, customerId: customer_id})
@@ -53,17 +55,19 @@ const getBankAccounts = (req, res) => {
         return res.status(400).send(error);
     })
 }
+
 /*
 const getOneBankAccount = (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
-    const customerId = req.query.customerId;
-    // console.log("%j" + JSON.stringify(req.headers) +  " coucou");
-    console.log(customerId);
     return BankAccount.findById(id)
-    .populate('customerId', 'firstname lastname -_id')
+    .populate('customerId', 'firstname lastname')
     .then((bankAccountFound) => {
-        return res.send(bankAccountFound);
+        if (userId == bankAccountFound.customerId._id) {
+            return res.send(bankAccountFound);
+        } else { 
+            return res.status(403).send('You don\'t have access to this bank account\'s data !');
+        }
     })
     .catch((error) => {
         return res.status(400).send(error);
@@ -80,7 +84,7 @@ const getOneBankAccount = (req, res) => {
         if (userId == bankAccountFound.customerId._id) {
             return res.send(bankAccountFound);
         } else { 
-            return res.status(403).send('You don\'t have access to this customer\'s data !');
+            return res.status(403).send('You don\'t have access to this bank account\'s data !');
         }
     })
     .catch((error) => {
@@ -88,18 +92,37 @@ const getOneBankAccount = (req, res) => {
     })
 }
 
+const putBankAccount = async (req, res) => {
+    const id = req.params.id;
+    const userId = req.headers.userid;
+    const amount = req.body.amount;
+    const account = await BankAccount.findById(id);
+    const customer = await Customer.findById(userId);
+    if (account.customerId.toString() === customer._id.toString()) {
+        return BankAccount.findByIdAndUpdate(id, { amount })
+        .then((amountUpdated) => {
+            return res.status(201).send(amountUpdated);
+        })
+        .catch((error) => {
+            return res.status(400).send(error);
+        })
+    } else {
+        return res.status(403).send('You don\'t have access to this bank account\'s data !');
+    }
+}
+/*
 const putBankAccount = (req, res) => {
     const id = req.params.id;
     const amount = req.body.amount;
     return BankAccount.findByIdAndUpdate(id, { amount })
     .then((amountUpdated) => {
-        res.status(201).send(amountUpdated);
+            return res.status(201).send(amountUpdated);
     })
     .catch((error) => {
-        res.status(400).send(error);
+        return res.status(400).send(error);
     })
 }
-
+*/
 const deleteBankAccount = (req, res) => {
     const id = req.params.id;
     return BankAccount.findByIdAndDelete(id)

@@ -28,10 +28,15 @@ const getAdvisors = (req, res) => {
 
 const getOneAdvisor = (req, res) => {
     const id = req.params.id;
+    const userId = req.headers.userid;
     return Advisor.findById(id)
-    .populate('managerId', 'firstname lastname -_id')
+    .populate('managerId', 'firstname lastname')
     .then((advisorFound) => {
-        return res.send(advisorFound);
+        if (userId == advisorFound.managerId._id) {
+            return res.send(advisorFound);
+        } else {
+            return res.status(403).send('You don\'t have access to this advisor\'s data !')
+        }
     })
     .catch((error) => {
         return res.status(400).send(error);

@@ -40,10 +40,15 @@ const getCustomers = (req, res) => {
 
 const getOneCustomer = (req, res) => {
     const id = req.params.id;
+    const userId = req.headers.userid;
     return Customer.findById(id)
-    .populate('advisorId', 'firstname lastname -_id')
+    .populate('advisorId', 'firstname lastname')
     .then((customerFound) => {
-        return res.send(customerFound);
+        if (userId == customerFound.advisorId._id) {
+            return res.send(customerFound);
+        } else {
+            return res.status(403).send('You don\'t have access to this customer\'s data !')
+        }
     })
     .catch((error) => {
         return res.status(400).send(error);
