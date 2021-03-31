@@ -44,6 +44,7 @@ const getOneCustomer = (req, res) => {
     return Customer.findById(id)
     .populate('advisorId', 'firstname lastname')
     .then((customerFound) => {
+        console.log(customerFound);
         if (userId == customerFound.advisorId._id) {
             return res.send(customerFound);
         } else {

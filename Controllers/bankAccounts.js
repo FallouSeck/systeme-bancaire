@@ -1,5 +1,6 @@
 const BankAccount = require('../Models/BankAccount');
 const Customer = require('../Models/Customer');
+const Advisor = require('../Models/Advisor');
 
 
 const findInTheDatabase = (customer_id, _type) => {
@@ -56,7 +57,6 @@ const getBankAccounts = (req, res) => {
     })
 }
 
-/*
 const getOneBankAccount = (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
@@ -73,22 +73,13 @@ const getOneBankAccount = (req, res) => {
         return res.status(400).send(error);
     })
 }
-*/
 
-const getOneBankAccount = (req, res) => {
-    const id = req.params.id;
-    const userId = req.headers.userid;
-    return BankAccount.findById(id)
-    .populate('customerId', 'firstname lastname')
-    .then((bankAccountFound) => {
-        if (userId == bankAccountFound.customerId._id) {
-            return res.send(bankAccountFound);
-        } else { 
-            return res.status(403).send('You don\'t have access to this bank account\'s data !');
-        }
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
+const checkAdvisorId = (advisor_id, customer_id) => {
+    return Customer.findOne({advisorId: advisor_id, _id: customer_id})
+    .then((advisorId) => {
+        console.log(advisorId);
+        if(advisorId) return true;
+        else return false;
     })
 }
 
@@ -98,8 +89,27 @@ const putBankAccount = async (req, res) => {
     const amount = req.body.amount;
     const account = await BankAccount.findById(id);
     const customer = await Customer.findById(userId);
-    if (account.customerId.toString() === customer._id.toString()) {
-        return BankAccount.findByIdAndUpdate(id, { amount })
+    const advisor = await Advisor.findById(userId);
+    let checkCustomer;
+    let checkAdvisor;
+    //On verifie que le user est un customer et que c'est le propriétaire du compte
+    if (customer != null || customer != undefined) {
+        if (account.customerId.toString() === customer._id.toString()) {
+            checkCustomer = true;
+        }
+    }
+
+    //On verifie que le user est un advisor et qu'il s'agit bien de l'advisor du customer de ce bankAccount
+    if (advisor != null || advisor != undefined) {
+        try {
+            checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
+        } catch (error) {
+            return res.status(500).send(error);
+        }
+    }
+    
+    if (checkCustomer === true || checkAdvisor === true) {
+        return BankAccount.findByIdAndUpdate(id, { amount: amount })
         .then((amountUpdated) => {
             return res.status(201).send(amountUpdated);
         })
@@ -110,19 +120,26 @@ const putBankAccount = async (req, res) => {
         return res.status(403).send('You don\'t have access to this bank account\'s data !');
     }
 }
+
+
 /*
-const putBankAccount = (req, res) => {
+const putBankAccount = async (req, res) => {
     const id = req.params.id;
+    const userId = req.headers.userid;
     const amount = req.body.amount;
-    return BankAccount.findByIdAndUpdate(id, { amount })
-    .then((amountUpdated) => {
-            return res.status(201).send(amountUpdated);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    const account = await BankAccount.findById(id);
+    const customer = await Customer.findById(userId);
+    const advisor = await Advisor.findById(userId);
+    let result;
+    try {
+        result = await checkAdvisorId(advisor._id, account.customerId);
+    } catch (error) {
+        return error;
+    }
+    console.log(result);
 }
 */
+
 const deleteBankAccount = (req, res) => {
     const id = req.params.id;
     return BankAccount.findByIdAndDelete(id)
