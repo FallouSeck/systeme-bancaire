@@ -19,7 +19,7 @@ Des users
     5. Clients
         a. Des comptes (épargne et courant)
         b. Au maximum un 1 de chaque et interdiction d’en avoir plus
-        c. Un client doit obligatoirement avoir un comte et un conseiller
+        c. Un client doit obligatoirement avoir un compte et un conseiller
 
 
 Avec cette API et postman il faudra :
@@ -43,7 +43,7 @@ Avec cette API et postman il faudra :
      => le client n'a accès qu'à ses comptes(consultation et modification)
     1.2
      => le advisor ne doit avoir accès qu'à ses customers
-     (consultations => fiches client, bankAccounts)
+     (consultations => fiche client, bankAccounts)
      (création, modification, suppression => fiches client, bankAccounts)
      => il ne doit avoir aucun accès sur un client d'un autre conseiller(consultation ou action)
     1.3
@@ -56,5 +56,5 @@ Avec cette API et postman il faudra :
     1.5
      => seul le directeur a acces sur le securityAgent(consultation, action)
     1.6
-     => seul le securityAgent a acces a la création des securityRounds
+     => seul le securityAgent a accès a la création des securityRounds
      => seul le director et le securityAgent ont accès à la consultation des securityRounds

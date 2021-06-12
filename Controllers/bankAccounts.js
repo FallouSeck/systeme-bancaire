@@ -2,6 +2,8 @@ const BankAccount = require('../Models/BankAccount');
 const Customer = require('../Models/Customer');
 const Advisor = require('../Models/Advisor');
 const Manager = require('../Models/Manager');
+const Director = require('../Models/Director');
+const mongoose = require('mongoose');
 
 
 const findInTheDatabase = (customer_id, _type) => {
@@ -74,23 +76,23 @@ const getOneBankAccount = (req, res) => {
         return res.status(400).send(error);
     })
 }
-/*
+
 const checkAdvisorId = (advisor_id, customer_id) => {
-    return Customer.findOne({advisorId: advisor_id, _id: customer_id})
+    return Customer.findOne({ advisorId: advisor_id, _id: customer_id })
     .then((customer) => {
         console.log(customer);
         if(customer) return true;
         else return false;
     })
 }
-*/
+
 const checkManagerId = async (manager_id, account) => {
     let result = 0;
     let validate = false;
     let customersFound = [];
     let bankAccountsFound = [];
     let advisorsFound = await Advisor.find({ managerId: manager_id });
-
+  
     for (let i = 0; i < advisorsFound.length; i++) {
         const element = advisorsFound[i];
         let customer = await Customer.find({ advisorId: element._id });
@@ -105,6 +107,7 @@ const checkManagerId = async (manager_id, account) => {
             bankAccountsFound.push(bankAccount);
         }
     }
+
     bankAccountsFound.forEach(element => {
         element.forEach(el => {
             if (account._id.toString() === el._id.toString()) {
@@ -120,45 +123,60 @@ const putBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
     const amount = req.body.amount;
+
+    // On verifie sur le userId et et l'id sont valide
+    const isValid = mongoose.isValidObjectId(userId);
+    const isValidAccount = mongoose.isValidObjectId(id)
+    if (isValidAccount === false) {
+        return res.status(400).send("l'id du compte n'est pas valide");
+    }
+
     const account = await BankAccount.findById(id);
-    const customer = await Customer.findById(userId);
-    const advisor = await Advisor.findById(userId);
-    const manager = await Manager.findById(userId);
-    let checkCustomer;
-    let checkAdvisor;
-    //On verifie si le user est un customer et que c'est le propriétaire du compte
-    if (customer != null || customer != undefined) {
-        if (account.customerId.toString() === customer._id.toString()) {
-            checkCustomer = true;
+    if (isValid === true) {
+        const customer = await Customer.findById(userId);
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkManager;
+        let checkCustomer;
+        let checkAdvisor;
+
+        //On verifie si le user est un customer et que c'est le propriétaire du compte
+        if (customer != null || customer != undefined) {
+            if (account.customerId.toString() === customer._id.toString()) {
+                checkCustomer = true;
+            }
         }
-    }
-    //On verifie si le user est un advisor et qu'il s'agit bien de l'advisor du customer de ce compte
-    if (advisor != null || advisor != undefined) {
-        try {
-            checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
-        } catch (error) {
-            return res.status(500).send(error);
+        //On verifie si le user est un advisor et qu'il s'agit bien de l'advisor du customer de ce compte
+        if (advisor != null || advisor != undefined) {
+            try {
+                checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
         }
-    }
-    //On verifie si le user est un manager et qu'il s'agit bien du manager de l'advisor du customer de ce compte
-    if (manager != null || manager != undefined) {
-        try{
-            checkManager = await checkManagerId(manager._id, account);
-        } catch (error) {
-            return res.status(500).send(error);
+        //On verifie si le user est un manager et qu'il s'agit bien du manager de l'advisor du customer de ce compte
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, account);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
         }
-    }
-    //Si le user est lié à ce compte alors on fait la modif
-    if (checkCustomer === true || checkAdvisor === true || checkManager === true) {
-        return BankAccount.findByIdAndUpdate(id, { amount: amount })
-        .then((amountUpdated) => {
-            return res.status(201).send(amountUpdated);
-        })
-        .catch((error) => {
-            return res.status(400).send(error);
-        })
+        //Si le user est lié à ce compte et que l'Id est valide alors on fait la modif
+        if (checkCustomer === true || checkAdvisor === true || checkManager === true || userId === director._id.toString() && isValid === true) {
+            return BankAccount.findByIdAndUpdate(id, { amount: amount })
+            .then((amountUpdated) => {
+                return res.status(201).send(amountUpdated);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this bank account\'s data !');
+        }
     } else {
-        return res.status(403).send('You don\'t have access to this bank account\'s data !');
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
 }
 

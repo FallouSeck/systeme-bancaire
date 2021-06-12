@@ -12,7 +12,7 @@ const CustomerSchema = new Schema({
         city: { type: String },
         country: { type: String }
     },
-    status: { type: String, enum: ['authorized', 'prohibited'], default: 'authorized', required: true },
+    bankAuthorisation: { type: String, enum: ['authorized', 'prohibited'], default: 'authorized', required: true },
     advisorId: { type: mongoose.Schema.Types.ObjectId, ref: "Advisor", required: true },
     creationDate: { type: Date }
 });

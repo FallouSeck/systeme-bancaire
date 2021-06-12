@@ -6,7 +6,7 @@ const createCustomer = (req, res) => {
         lastname: req.body.lastname,
         birthday: req.body.birthday,
         adress: req.body.adress,
-        status: req.body.status,
+        bankAuthorisation: req.body.bankAuthorisation,
         advisorId: req.body.advisorId,
         creationDate: Date.now()
     })
