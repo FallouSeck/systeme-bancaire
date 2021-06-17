@@ -80,7 +80,6 @@ const getOneBankAccount = (req, res) => {
 const checkAdvisorId = (advisor_id, customer_id) => {
     return Customer.findOne({ advisorId: advisor_id, _id: customer_id })
     .then((customer) => {
-        console.log(customer);
         if(customer) return true;
         else return false;
     })
@@ -119,6 +118,14 @@ const checkManagerId = async (manager_id, account) => {
     return validate;
 }
 
+const checkDirectorId = async (director_id) => {
+    return Director.find({ _id: director_id })
+    .then((director) => {
+        if(director) return true;
+        else return false;
+    })
+}
+
 const putBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
@@ -143,6 +150,8 @@ const putBankAccount = async (req, res) => {
 
         //On verifie si le user est un customer et que c'est le propriétaire du compte
         if (customer != null || customer != undefined) {
+            console.log(customer._id);
+            console.log(typeof(customer._id));
             if (account.customerId.toString() === customer._id.toString()) {
                 checkCustomer = true;
             }
@@ -180,15 +189,65 @@ const putBankAccount = async (req, res) => {
     }
 }
 
-const deleteBankAccount = (req, res) => {
+const deleteBankAccount = async (req, res) => {
     const id = req.params.id;
-    return BankAccount.findByIdAndDelete(id)
-    .then(() => {
-        return res.send(`Account n°${id} has been deleted !`);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    const userId = req.headers.userid;
+
+    const isValidUser = mongoose.isValidObjectId(userId);
+    const isValidAccount = mongoose.isValidObjectId(id)
+    if (isValidAccount === false) {
+        return res.status(400).send("l'id du compte n'est pas valide");
+    }
+
+    const account = await BankAccount.findById(id);
+    if (isValidUser === true) {
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkManager;
+        let checkAdvisor;
+        let checkDirector;
+
+        if (advisor != null || advisor != undefined) {
+            try {
+                checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, account);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                // if (director._id.toString() === userId) {
+                //     checkDirector = true;
+                // }
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+            /*console.log(director);
+            console.log(directorId);*/
+            return BankAccount.findByIdAndDelete(id)
+            .then(() => {
+                return res.send(`Account n°${id} has been deleted !`);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this bank account\'s data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 module.exports = {
