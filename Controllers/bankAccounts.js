@@ -144,9 +144,10 @@ const putBankAccount = async (req, res) => {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
-        let checkManager;
         let checkCustomer;
         let checkAdvisor;
+        let checkManager;
+        let checkDirector;
 
         //On verifie si le user est un customer et que c'est le propriétaire du compte
         if (customer != null || customer != undefined) {
@@ -172,8 +173,18 @@ const putBankAccount = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
+        if (director != null || director != undefined) {
+            try {
+                // if (director._id.toString() === userId) {
+                //     checkDirector = true;
+                // }
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
         //Si le user est lié à ce compte et que l'Id est valide alors on fait la modif
-        if (checkCustomer === true || checkAdvisor === true || checkManager === true || userId === director._id.toString() && isValid === true) {
+        if (checkCustomer === true || checkAdvisor === true || checkManager === true || checkDirector === true && isValid === true) {
             return BankAccount.findByIdAndUpdate(id, { amount: amount })
             .then((amountUpdated) => {
                 return res.status(201).send(amountUpdated);
