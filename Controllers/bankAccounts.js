@@ -16,6 +16,52 @@ const findInTheDatabase = (customer_id, _type) => {
             }
         })
 }
+const checkAdvisorId = (advisor_id, customer_id) => {
+    return Customer.findOne({ advisorId: advisor_id, _id: customer_id })
+    .then((customer) => {
+        if(customer) return true;
+        else return false;
+    })
+}
+const checkManagerId = async (manager_id, account) => {
+    let result = 0;
+    let validate = false;
+    let customersFound = [];
+    let bankAccountsFound = [];
+    let advisorsFound = await Advisor.find({ managerId: manager_id });
+  
+    for (let i = 0; i < advisorsFound.length; i++) {
+        const element = advisorsFound[i];
+        let customer = await Customer.find({ advisorId: element._id });
+        customersFound.push(customer);
+    }
+
+    for (let i = 0; i < customersFound.length; i++) {
+        const element = customersFound[i];
+        for (let index = 0; index < element.length; index++) {
+            const el = element[index];
+            let bankAccount = await BankAccount.find({ customerId: el._id });
+            bankAccountsFound.push(bankAccount);
+        }
+    }
+
+    bankAccountsFound.forEach(element => {
+        element.forEach(el => {
+            if (account._id.toString() === el._id.toString()) {
+                result += 1;
+                if (result === 1) validate = true;
+            }
+        })
+    })
+    return validate;
+}
+const checkDirectorId = async (director_id) => {
+    return Director.find({ _id: director_id })
+    .then((director) => {
+        if(director) return true;
+        else return false;
+    })
+}
 
 async function createBankAccount (req, res) {
     let result;
@@ -60,70 +106,69 @@ const getBankAccounts = (req, res) => {
     })
 }
 
-const getOneBankAccount = (req, res) => {
+const getOneBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
-    return BankAccount.findById(id)
-    .populate('customerId', 'firstname lastname')
-    .then((bankAccountFound) => {
-        if (userId == bankAccountFound.customerId._id) {
-            return res.send(bankAccountFound);
-        } else { 
+    const isValidUser = mongoose.isValidObjectId(userId);
+    const isValidAccount = mongoose.isValidObjectId(id)
+    if (isValidAccount === false) {
+        return res.status(400).send("l'id du compte n'est pas valide");
+    }
+    const account = await BankAccount.findById(id);
+    if (isValidUser === true) {
+        const customer = await Customer.findById(userId);
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkCustomer;
+        let checkAdvisor;
+        let checkManager;
+        let checkDirector;
+
+        if (customer != null || customer != undefined) {
+            if (account.customerId.toString() === customer._id.toString()) {
+                checkCustomer = true;
+            }
+        }
+        if (advisor != null || advisor != undefined) {
+            try {
+                checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, account);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                // if (director._id.toString() === userId) {
+                //     checkDirector = true;
+                // }
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkCustomer === true || checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+            return BankAccount.findById(id)
+            .populate('customerId', 'firstname lastname')
+            .then((bankAccountFound) => {
+                return res.status(200).send(bankAccountFound);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
             return res.status(403).send('You don\'t have access to this bank account\'s data !');
         }
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
-}
-
-const checkAdvisorId = (advisor_id, customer_id) => {
-    return Customer.findOne({ advisorId: advisor_id, _id: customer_id })
-    .then((customer) => {
-        if(customer) return true;
-        else return false;
-    })
-}
-
-const checkManagerId = async (manager_id, account) => {
-    let result = 0;
-    let validate = false;
-    let customersFound = [];
-    let bankAccountsFound = [];
-    let advisorsFound = await Advisor.find({ managerId: manager_id });
-  
-    for (let i = 0; i < advisorsFound.length; i++) {
-        const element = advisorsFound[i];
-        let customer = await Customer.find({ advisorId: element._id });
-        customersFound.push(customer);
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
-
-    for (let i = 0; i < customersFound.length; i++) {
-        const element = customersFound[i];
-        for (let index = 0; index < element.length; index++) {
-            const el = element[index];
-            let bankAccount = await BankAccount.find({ customerId: el._id });
-            bankAccountsFound.push(bankAccount);
-        }
-    }
-
-    bankAccountsFound.forEach(element => {
-        element.forEach(el => {
-            if (account._id.toString() === el._id.toString()) {
-                result += 1;
-                if (result === 1) validate = true;
-            }
-        })
-    })
-    return validate;
-}
-
-const checkDirectorId = async (director_id) => {
-    return Director.find({ _id: director_id })
-    .then((director) => {
-        if(director) return true;
-        else return false;
-    })
 }
 
 const putBankAccount = async (req, res) => {
@@ -151,8 +196,6 @@ const putBankAccount = async (req, res) => {
 
         //On verifie si le user est un customer et que c'est le propriétaire du compte
         if (customer != null || customer != undefined) {
-            console.log(customer._id);
-            console.log(typeof(customer._id));
             if (account.customerId.toString() === customer._id.toString()) {
                 checkCustomer = true;
             }
