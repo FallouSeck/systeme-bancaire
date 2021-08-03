@@ -92,10 +92,25 @@ async function createBankAccount (req, res) {
 const getBankAccounts = (req, res) => {
     let criteria = {};
     const type = req.query.type;
-    if (type === undefined) {
+    const customerId = req.query.customerId;
+    const { afterDate } = req.query;
+    const beforeDate = req.query.beforeDate;
+    /*if (type === undefined) {
         criteria = {};
     } else {
         criteria.type = type;
+    }*/
+    if(type) {
+        criteria.type = type;
+    }
+    if (customerId) {
+        criteria.customerId = customerId;
+    }
+    if (afterDate) {
+        criteria.creationDate = { $gte: afterDate };
+    }
+    if (beforeDate) {
+        criteria.creationDate = { $lte: beforeDate };
     }
     return BankAccount.find(criteria)
     .then((bankAccounts) => {
@@ -175,14 +190,12 @@ const putBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
     const amount = req.body.amount;
-
     // On verifie sur le userId et et l'id sont valide
     const isValid = mongoose.isValidObjectId(userId);
     const isValidAccount = mongoose.isValidObjectId(id)
     if (isValidAccount === false) {
         return res.status(400).send("l'id du compte n'est pas valide");
     }
-
     const account = await BankAccount.findById(id);
     if (isValid === true) {
         const customer = await Customer.findById(userId);
@@ -193,7 +206,6 @@ const putBankAccount = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-
         //On verifie si le user est un customer et que c'est le propriétaire du compte
         if (customer != null || customer != undefined) {
             if (account.customerId.toString() === customer._id.toString()) {
@@ -246,22 +258,19 @@ const putBankAccount = async (req, res) => {
 const deleteBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
-
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidAccount = mongoose.isValidObjectId(id)
     if (isValidAccount === false) {
         return res.status(400).send("l'id du compte n'est pas valide");
     }
-
     const account = await BankAccount.findById(id);
     if (isValidUser === true) {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
-        let checkManager;
         let checkAdvisor;
+        let checkManager;
         let checkDirector;
-
         if (advisor != null || advisor != undefined) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
@@ -287,8 +296,6 @@ const deleteBankAccount = async (req, res) => {
             }
         }
         if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
-            /*console.log(director);
-            console.log(directorId);*/
             return BankAccount.findByIdAndDelete(id)
             .then(() => {
                 return res.send(`Account n°${id} has been deleted !`);
