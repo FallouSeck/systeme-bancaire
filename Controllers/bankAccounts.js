@@ -259,7 +259,7 @@ const deleteBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
-    const isValidAccount = mongoose.isValidObjectId(id)
+    const isValidAccount = mongoose.isValidObjectId(id);
     if (isValidAccount === false) {
         return res.status(400).send("l'id du compte n'est pas valide");
     }
