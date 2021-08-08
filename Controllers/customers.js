@@ -99,20 +99,62 @@ const getOneCustomer = (req, res) => {
     })
 }
 
-const putCustomer = (req, res) => {
+const putCustomer = async (req, res) => {
     const id = req.params.id;
+    const userId = req.headers.userid;
     const adress = req.body.adress;
     const advisorId = req.body.advisorId;
     let criteria = {};
     if(adress) criteria.adress = adress;
     if(advisorId) criteria.advisorId = advisorId;
-    return Customer.findByIdAndUpdate(id, criteria)
-    .then((customerUpdated) => {
-        return res.status(201).send(customerUpdated);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    const isValidUser = mongoose.isValidObjectId(userId);
+    const isValidCustomer = mongoose.isValidObjectId(id);
+    if (isValidCustomer === false) {
+        return res.status(400).send("l'id du customer n'est pas valide");
+    }
+    const customer = await Customer.findById(id);
+    if (isValidUser === true) {
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkAdvisor;
+        let checkManager;
+        let checkDirector;
+        if (advisor != null || advisor != undefined) {
+            try {
+                checkAdvisor = await checkAdvisorId(advisor._id, customer._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, customer);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+            return Customer.findByIdAndUpdate(id, criteria)
+            .then((customerUpdated) => {
+                return res.status(201).send(customerUpdated);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this customer\'s data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const deleteCustomer = async (req, res) => {
@@ -124,7 +166,7 @@ const deleteCustomer = async (req, res) => {
         return res.status(400).send("l'id du customer n'est pas valide");
     }
     const customer = await Customer.findById(id);
-    if (isValidCustomer === true) {
+    if (isValidUser === true) {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);

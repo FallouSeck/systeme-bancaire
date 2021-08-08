@@ -192,7 +192,7 @@ const putBankAccount = async (req, res) => {
     const amount = req.body.amount;
     // On verifie sur le userId et et l'id sont valide
     const isValid = mongoose.isValidObjectId(userId);
-    const isValidAccount = mongoose.isValidObjectId(id)
+    const isValidAccount = mongoose.isValidObjectId(id);
     if (isValidAccount === false) {
         return res.status(400).send("l'id du compte n'est pas valide");
     }
