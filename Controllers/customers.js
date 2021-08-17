@@ -204,7 +204,7 @@ const putCustomer = async (req, res) => {
     }
 }
 
-const deleteCustomer = async (req, res) => {
+const deleteOneCustomer = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
@@ -259,5 +259,5 @@ module.exports = {
     getCustomers: getCustomers,
     getOneCustomer: getOneCustomer,
     putCustomer: putCustomer,    
-    deleteCustomer: deleteCustomer
+    deleteOneCustomer: deleteOneCustomer
 }
