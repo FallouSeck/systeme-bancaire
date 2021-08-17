@@ -76,7 +76,7 @@ async function createBankAccount (req, res) {
                 customerId: req.body.customerId,
                 amount: req.body.amount,
                 creationDate: Date.now()
-            });
+            })
             return newAccount.save()
             .then((savedAccount) => {
                 return res.status(201).send(savedAccount);
@@ -86,14 +86,14 @@ async function createBankAccount (req, res) {
             });
         } else {
             return res.status(400).send(`Customers can only have 1 ${req.body.type} account.`); 
-        };
+        }
 }
 
 const getBankAccounts = (req, res) => {
     let criteria = {};
     const type = req.query.type;
     const customerId = req.query.customerId;
-    const { afterDate } = req.query;
+    const afterDate = req.query.afterDate;
     const beforeDate = req.query.beforeDate;
     /*if (type === undefined) {
         criteria = {};
@@ -124,8 +124,8 @@ const getBankAccounts = (req, res) => {
 const getOneBankAccount = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
+    const isValidAccount = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
-    const isValidAccount = mongoose.isValidObjectId(id)
     if (isValidAccount === false) {
         return res.status(400).send("l'id du compte n'est pas valide");
     }
@@ -139,7 +139,6 @@ const getOneBankAccount = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-
         if (customer != null || customer != undefined) {
             if (account.customerId.toString() === customer._id.toString()) {
                 checkCustomer = true;

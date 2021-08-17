@@ -81,22 +81,69 @@ const getCustomers = (req, res) => {
     })
 }
 
-const getOneCustomer = (req, res) => {
+const getOneCustomer = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
-    return Customer.findById(id)
-    .populate('advisorId', 'firstname lastname')
-    .then((customerFound) => {
-        console.log(customerFound);
-        if (userId == customerFound.advisorId._id) {
-            return res.send(customerFound);
-        } else {
-            return res.status(403).send('You don\'t have access to this customer\'s data !')
+    const isValidCustomer = mongoose.isValidObjectId(id);
+    const isValidUser = mongoose.isValidObjectId(userId);
+    if (isValidCustomer === false) {
+        return res.status(400).send("l'id du customer n'est pas valide");
+    }
+    const customer = await Customer.findById(id);
+    if (isValidUser === true) {
+        const customerToFind = await Customer.findById(userId);
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkCustomer;
+        let checkAdvisor;
+        let checkManager;
+        let checkDirector;
+        if (customerToFind != null || customerToFind != undefined) {
+            try {
+                if (customer._id.toString() === customerToFind._id.toString()) {
+                    checkCustomer = true;
+                }
+            } catch (error) {
+                return res.status(500).send(error);
+            }
         }
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+        if (advisor != null || advisor != undefined) {
+            try {
+                checkAdvisor = await checkAdvisorId(advisor._id, customer._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, customer);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkCustomer === true || checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+            return Customer.findById(id)
+            .populate('advisorId', 'firstname lastname')
+            .then((customerFound) => {
+                return res.status(200).send(customerFound);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this customer\'s data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const putCustomer = async (req, res) => {
