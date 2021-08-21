@@ -49,7 +49,7 @@ const createAdvisor = async (req, res) => {
                     return res.status(403).send('You only can create a subordinate advisor !');
                 }
             } catch (error) {
-                return res.status(500).send(error + '');
+                return res.status(500).send(error);
             }
         }
         if (director != null || director != undefined) {
@@ -106,7 +106,7 @@ const getAdvisors = async (req, res) => {
                 return res.status(400).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have access to the advisor\'s data !');
+            return res.status(403).send('You don\'t have access to the advisors data !');
         }
     } else {
         return res.status(400).send("le userId saisi n'est pas valide !");

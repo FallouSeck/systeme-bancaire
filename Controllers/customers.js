@@ -56,7 +56,9 @@ const checkDirectorId = async (director_id) => {
     })
 }
 
-const createCustomer = (req, res) => {
+const createCustomer = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     const newCustomer = new Customer({
         firstname: req.body.firstname,
         lastname: req.body.lastname,
@@ -66,13 +68,54 @@ const createCustomer = (req, res) => {
         advisorId: req.body.advisorId,
         creationDate: Date.now()
     })
-    return newCustomer.save()
-    .then((savedCustomer) => {
-        return res.status(201).send(savedCustomer);
-    })
-    .catch((error) => {
-        return res.status(500).send(error);
-    })
+    if (isValidUser === true) {
+        const advisor = await Advisor.findById(userId);
+        //const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkAdvisor;
+        //let checkManager;
+        let checkDirector;
+        if (advisor != null || advisor != undefined) {
+            try{
+                if (advisor._id.toString() === newCustomer.advisorId.toString()){
+                    checkAdvisor = true;
+                } else {
+                    checkAdvisor = false;
+                    return res.status(403).send('You only can create a subordinate advisor !');
+                }
+            } catch (error) {
+                return res.status(500).send(error + '');
+            }
+        }
+        /*if (manager != null || manager != undefined) {
+            try{
+                    checkManager = await checkManagerId(manager._id, newCustomer);
+                }
+            catch (error) {
+                return res.status(500).send(error + '');
+            }
+        }*/
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkAdvisor === true || checkDirector === true && isValidUser === true) {
+            return newCustomer.save()
+            .then((savedCustomer) => {
+                return res.status(201).send(savedCustomer);
+            })
+            .catch((error) => {
+                return res.status(500).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have permission to create new customer !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const getCustomers = async (req, res) => {
