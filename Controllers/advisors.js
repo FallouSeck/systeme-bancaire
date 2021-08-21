@@ -11,6 +11,13 @@ const checkManagerId = (manager_id, advisor_id) => {
         else return false;
     })
 }
+const checkIfManager = async (manager_id) => {
+    return Manager.find({_id: manager_id})
+    .then((manager) => {
+        if(manager) return true;
+        else return false;
+    })
+}
 const checkDirectorId = async (director_id) => {
     return Director.find({ _id: director_id })
     .then((director) => {
@@ -35,14 +42,40 @@ const createAdvisor = (req, res) => {
     })
 }
 
-const getAdvisors = (req, res) => {
-    return Advisor.find()
-    .then((advisorsFound) => {
-        return res.send(advisorsFound);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+const getAdvisors = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
+    if (isValidUser === true) {
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkManager;
+        let checkDirector;
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkIfManager(manager._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkManager === true || checkDirector === true && isValidUser === true) {
+            return Advisor.find()
+            .then((advisorsFound) => {
+                return res.send(advisorsFound);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this advisor\'s data !');
+        }
+    }
 }
 
 const getOneAdvisor = async (req, res) => {
