@@ -34,6 +34,20 @@ const checkManagerId = async (manager_id, customer) => {
     })
     return validate;
 }
+const checkIfAdvisor = async (advisor_id) => {
+    return Advisor.find({_id: advisor_id})
+    .then((advisor) => {
+        if(advisor) return true;
+        else return false;
+    })
+}
+const checkIfManager = async (manager_id) => {
+    return Manager.find({_id: manager_id})
+    .then((manager) => {
+        if(manager) return true;
+        else return false;
+    })
+}
 const checkDirectorId = async (director_id) => {
     return Director.find({ _id: director_id })
     .then((director) => {
@@ -61,7 +75,9 @@ const createCustomer = (req, res) => {
     })
 }
 
-const getCustomers = (req, res) => {
+const getCustomers = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     let criteria = {};
     // const city = req.query.adress;
     /*if (city === undefined) {
@@ -71,14 +87,49 @@ const getCustomers = (req, res) => {
         console.log(criteria.city+"+++");
         criteria.city = city ;
     }*/
-    return Customer.find(criteria)
-    .then((customers) => {
-        // console.log(customers[3].adress.city);
-        return res.send(customers);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    if (isValidUser === true) {
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkAdvisor;
+        let checkManager;
+        let checkDirector;
+        if (advisor != null || advisor != undefined) {
+            try {
+                checkAdvisor = await checkIfAdvisor(advisor._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkIfManager(manager._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+            return Customer.find(criteria)
+            .then((customers) => {
+                // console.log(customers[3].adress.city);
+                return res.send(customers);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to the customers data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const getOneCustomer = async (req, res) => {

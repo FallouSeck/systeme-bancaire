@@ -75,9 +75,6 @@ const createAdvisor = async (req, res) => {
     }
 }
 
-
-
-
 const getAdvisors = async (req, res) => {
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
@@ -109,7 +106,7 @@ const getAdvisors = async (req, res) => {
                 return res.status(400).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have access to this advisor\'s data !');
+            return res.status(403).send('You don\'t have access to the advisor\'s data !');
         }
     } else {
         return res.status(400).send("le userId saisi n'est pas valide !");
