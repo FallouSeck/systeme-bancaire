@@ -157,7 +157,7 @@ const putCustomer = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidCustomer = mongoose.isValidObjectId(id);
     if (isValidCustomer === false) {
-        return res.status(400).send("l'id du customer n'est pas valide");
+        return res.status(400).send("l'id du customer n'est pas valide !");
     }
     const customer = await Customer.findById(id);
     if (isValidUser === true) {

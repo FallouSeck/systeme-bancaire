@@ -62,16 +62,47 @@ const getOneAdvisor = (req, res) => {
     })
 }
 
-const putAdvisor = (req, res) => {
+const putAdvisor = async (req, res) => {
     const id = req.params.id;
-    const managerId = req.body.managerId;
-    return Advisor.findByIdAndUpdate(id, { managerId: managerId })
-    .then((advisorUpdated) => {
-        return res.status(201).send(advisorUpdated);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    const userId = req.headers.userid;
+    const manager_id = req.body.managerId;
+    const isValidUser = mongoose.isValidObjectId(userId);
+    const isValidAdvisor = mongoose.isValidObjectId(id);
+    if (isValidAdvisor === false) {
+        return res.status(400).send("l'id de l'advisor n'est pas valide !");
+    }
+    const advisor = await Advisor.findById(id);
+    if (isValidUser === true) {
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkManager;
+        let checkDirector;
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, advisor);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkManager === true || checkDirector === true && isValidUser === true) {
+            return Advisor.findByIdAndUpdate(id, { managerId: manager_id })
+            .then((advisorUpdated) => {
+                return res.status(201).send(advisorUpdated);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this advisor\'s data !');
+        }
+    }
 }
 
 const deleteOneAdvisor = async (req, res) => {
