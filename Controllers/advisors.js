@@ -26,21 +26,57 @@ const checkDirectorId = async (director_id) => {
     })
 }
 
-const createAdvisor = (req, res) => {
+const createAdvisor = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     const newAdvisor = new Advisor({
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         managerId: req.body.managerId,
         creationDate: Date.now()
     })
-    newAdvisor.save()
-    .then((newAdvisorCreated) => {
-        return res.status(201).send(newAdvisorCreated);
-    })
-    .catch((error) => {
-        return res.status(500).send(error);
-    })
+    if (isValidUser === true) {
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkManager;
+        let checkDirector;
+        if (manager != null || manager != undefined) {
+            try{
+                if (manager._id.toString() === newAdvisor.managerId.toString()){
+                    checkManager = true;
+                } else {
+                    checkManager = false;
+                    return res.status(403).send('You only can create a subordinate advisor !');
+                }
+            } catch (error) {
+                return res.status(500).send(error + '');
+            }
+        }
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkManager === true || checkDirector === true && isValidUser === true) {
+            newAdvisor.save()
+            .then((newAdvisorCreated) => {
+                return res.status(201).send(newAdvisorCreated);
+            })
+            .catch((error) => {
+                return res.status(500).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have permission to create new advisor !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
+
+
+
 
 const getAdvisors = async (req, res) => {
     const userId = req.headers.userid;
@@ -75,6 +111,8 @@ const getAdvisors = async (req, res) => {
         } else {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
 }
 
@@ -118,6 +156,8 @@ const getOneAdvisor = async (req, res) => {
         } else {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
 }
 
@@ -161,6 +201,8 @@ const putAdvisor = async (req, res) => {
         } else {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
 }
 
@@ -203,6 +245,8 @@ const deleteOneAdvisor = async (req, res) => {
         } else {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
 }
 module.exports = {

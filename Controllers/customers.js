@@ -252,6 +252,8 @@ const deleteOneCustomer = async (req, res) => {
         } else {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
         }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
     }
 }
 module.exports = {
