@@ -45,21 +45,47 @@ const getAdvisors = (req, res) => {
     })
 }
 
-const getOneAdvisor = (req, res) => {
+const getOneAdvisor = async (req, res) => {
     const id = req.params.id;
     const userId = req.headers.userid;
-    return Advisor.findById(id)
-    .populate('managerId', 'firstname lastname')
-    .then((advisorFound) => {
-        if (userId == advisorFound.managerId._id) {
-            return res.send(advisorFound);
-        } else {
-            return res.status(403).send('You don\'t have access to this advisor\'s data !')
+    const isValidAdvisor = mongoose.isValidObjectId(id);
+    const isValidUser = mongoose.isValidObjectId(userId);
+    if (isValidAdvisor === false) {
+        return res.status(400).send("l'id de l'advisor n'est pas valide");
+    }
+    const advisor = await Advisor.findById(id);
+    if (isValidUser === true) {
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        let checkManager;
+        let checkDirector;
+        if (manager != null || manager != undefined) {
+            try{
+                checkManager = await checkManagerId(manager._id, advisor);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
         }
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+        if (director != null || director != undefined) {
+            try {
+                checkDirector = await checkDirectorId(director._id);
+            } catch (error) {
+                return res.status(500).send(error);
+            }
+        }
+        if (checkManager === true || checkDirector === true && isValidUser === true) {
+            return Advisor.findById(id)
+            .populate('managerId', 'firstname lastname')
+            .then((advisorFound) => {
+                return res.status(200).send(advisorFound);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this advisor\'s data !');
+        }
+    }
 }
 
 const putAdvisor = async (req, res) => {
