@@ -144,25 +144,22 @@ const getOneBankAccount = async (req, res) => {
                 checkCustomer = true;
             }
         }
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, account);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
-                // if (director._id.toString() === userId) {
-                //     checkDirector = true;
-                // }
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
                 return res.status(500).send(error);
@@ -212,7 +209,7 @@ const putBankAccount = async (req, res) => {
             }
         }
         //On verifie si le user est un advisor et qu'il s'agit bien de l'advisor du customer de ce compte
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
             } catch (error) {
@@ -220,18 +217,15 @@ const putBankAccount = async (req, res) => {
             }
         }
         //On verifie si le user est un manager et qu'il s'agit bien du manager de l'advisor du customer de ce compte
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, account);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
-                // if (director._id.toString() === userId) {
-                //     checkDirector = true;
-                // }
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
                 return res.status(500).send(error);
@@ -270,25 +264,22 @@ const deleteBankAccount = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, account.customerId);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, account);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
-                // if (director._id.toString() === userId) {
-                //     checkDirector = true;
-                // }
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
                 return res.status(500).send(error);

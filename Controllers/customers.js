@@ -34,6 +34,18 @@ const checkManagerId = async (manager_id, customer) => {
     })
     return validate;
 }
+async function lolCestDeLaMerde (manager_id, newCustomer) {
+    return Advisor.find({_id: manager._id})
+    .then(() => {
+        return true;
+    })
+}
+
+
+
+
+
+
 const checkIfAdvisor = async (advisor_id) => {
     return Advisor.find({_id: advisor_id})
     .then((advisor) => {
@@ -70,12 +82,12 @@ const createCustomer = async (req, res) => {
     })
     if (isValidUser === true) {
         const advisor = await Advisor.findById(userId);
-        //const manager = await Manager.findById(userId);
+        const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
         let checkAdvisor;
-        //let checkManager;
+        let checkManager;
         let checkDirector;
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try{
                 if (advisor._id.toString() === newCustomer.advisorId.toString()){
                     checkAdvisor = true;
@@ -87,22 +99,25 @@ const createCustomer = async (req, res) => {
                 return res.status(500).send(error + '');
             }
         }
-        /*if (manager != null || manager != undefined) {
+        if (manager) {
             try{
-                    checkManager = await checkManagerId(manager._id, newCustomer);
+                    checkManager = await checkManagerId(manager._id, newCustomer.advisorId);
+                    console.log(manager._id);
+                    console.log(advisor._id);
+                    console.log(newCustomer.advisorId);
                 }
             catch (error) {
                 return res.status(500).send(error + '');
             }
-        }*/
-        if (director != null || director != undefined) {
+        }
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor === true || checkDirector === true && isValidUser === true) {
+        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
             return newCustomer.save()
             .then((savedCustomer) => {
                 return res.status(201).send(savedCustomer);
@@ -137,21 +152,21 @@ const getCustomers = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkIfAdvisor(advisor._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkIfManager(manager._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -193,7 +208,7 @@ const getOneCustomer = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-        if (customerToFind != null || customerToFind != undefined) {
+        if (customerToFind) {
             try {
                 if (customer._id.toString() === customerToFind._id.toString()) {
                     checkCustomer = true;
@@ -202,21 +217,21 @@ const getOneCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, customer._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, customer);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -261,21 +276,21 @@ const putCustomer = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, customer._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, customer);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -314,21 +329,21 @@ const deleteOneCustomer = async (req, res) => {
         let checkAdvisor;
         let checkManager;
         let checkDirector;
-        if (advisor != null || advisor != undefined) {
+        if (advisor) {
             try {
                 checkAdvisor = await checkAdvisorId(advisor._id, customer._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, customer);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {

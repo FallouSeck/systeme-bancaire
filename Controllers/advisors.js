@@ -4,7 +4,7 @@ const Director = require('../Models/Director');
 const mongoose = require('mongoose');
 
 
-const checkManagerId = (manager_id, advisor_id) => {
+const checkManagerId = async (manager_id, advisor_id) => {
     return Advisor.findOne({ managerId: manager_id, _id: advisor_id })
     .then((advisor) => {
         if(advisor) return true;
@@ -40,7 +40,7 @@ const createAdvisor = async (req, res) => {
         const director = await Director.findById(userId);
         let checkManager;
         let checkDirector;
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 if (manager._id.toString() === newAdvisor.managerId.toString()){
                     checkManager = true;
@@ -52,7 +52,7 @@ const createAdvisor = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -83,14 +83,14 @@ const getAdvisors = async (req, res) => {
         const director = await Director.findById(userId);
         let checkManager;
         let checkDirector;
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkIfManager(manager._id);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -127,14 +127,14 @@ const getOneAdvisor = async (req, res) => {
         const director = await Director.findById(userId);
         let checkManager;
         let checkDirector;
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, advisor);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -173,14 +173,14 @@ const putAdvisor = async (req, res) => {
         const director = await Director.findById(userId);
         let checkManager;
         let checkDirector;
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, advisor);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
@@ -217,14 +217,14 @@ const deleteOneAdvisor = async (req, res) => {
         const director = await Director.findById(userId);
         let checkManager;
         let checkDirector;
-        if (manager != null || manager != undefined) {
+        if (manager) {
             try{
                 checkManager = await checkManagerId(manager._id, advisor);
             } catch (error) {
                 return res.status(500).send(error);
             }
         }
-        if (director != null || director != undefined) {
+        if (director) {
             try {
                 checkDirector = await checkDirectorId(director._id);
             } catch (error) {
