@@ -4,7 +4,6 @@ const Manager = require('../Models/Manager');
 const Director = require('../Models/Director');
 const mongoose = require('mongoose');
 
-
 const checkAdvisorId = (advisor_id, customer_id) => {
     return Customer.findOne({ advisorId: advisor_id, _id: customer_id })
     .then((customer) => {
@@ -12,40 +11,13 @@ const checkAdvisorId = (advisor_id, customer_id) => {
         else return false;
     })
 }
-const checkManagerId = async (manager_id, customer) => {
-    let result = 0;
-    let validate = false;
-    let customersFound = [];
-    let advisorsFound = await Advisor.find({ managerId: manager_id });
-  
-    for (let i = 0; i < advisorsFound.length; i++) {
-        const element = advisorsFound[i];
-        let customer_found = await Customer.find({ advisorId: element._id });
-        customersFound.push(customer_found);
-    }
-
-    customersFound.forEach(element => {
-        element.forEach(el => {
-            if (customer._id.toString() === el._id.toString()) {
-                result +=1;
-                if (result === 1) validate = true;
-            }
-        })
-    })
-    return validate;
-}
-async function lolCestDeLaMerde (manager_id, newCustomer) {
-    return Advisor.find({_id: manager._id})
-    .then(() => {
-        return true;
+const checkManagerId = async (manager_id, advisor_id) => {
+    return Advisor.findOne({ managerId: manager_id, _id: advisor_id })
+    .then((advisor) => {
+        if(advisor) return true;
+        else return false;
     })
 }
-
-
-
-
-
-
 const checkIfAdvisor = async (advisor_id) => {
     return Advisor.find({_id: advisor_id})
     .then((advisor) => {
@@ -80,7 +52,7 @@ const createCustomer = async (req, res) => {
         advisorId: req.body.advisorId,
         creationDate: Date.now()
     })
-    if (isValidUser === true) {
+    if (isValidUser) {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
@@ -93,7 +65,7 @@ const createCustomer = async (req, res) => {
                     checkAdvisor = true;
                 } else {
                     checkAdvisor = false;
-                    return res.status(403).send('You only can create a subordinate advisor !');
+                    return res.status(403).send('You only can create a subordinate customer !');
                 }
             } catch (error) {
                 return res.status(500).send(error + '');
@@ -102,9 +74,6 @@ const createCustomer = async (req, res) => {
         if (manager) {
             try{
                     checkManager = await checkManagerId(manager._id, newCustomer.advisorId);
-                    console.log(manager._id);
-                    console.log(advisor._id);
-                    console.log(newCustomer.advisorId);
                 }
             catch (error) {
                 return res.status(500).send(error + '');
@@ -117,9 +86,10 @@ const createCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
             return newCustomer.save()
             .then((savedCustomer) => {
+                console.log('Successful !');
                 return res.status(201).send(savedCustomer);
             })
             .catch((error) => {
@@ -129,7 +99,7 @@ const createCustomer = async (req, res) => {
             return res.status(403).send('You don\'t have permission to create new customer !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("Le userId saisi n'est pas valide !");
     }
 }
 
@@ -145,7 +115,7 @@ const getCustomers = async (req, res) => {
         console.log(criteria.city+"+++");
         criteria.city = city ;
     }*/
-    if (isValidUser === true) {
+    if (isValidUser) {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
@@ -173,7 +143,7 @@ const getCustomers = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
             return Customer.find(criteria)
             .then((customers) => {
                 // console.log(customers[3].adress.city);
@@ -195,11 +165,11 @@ const getOneCustomer = async (req, res) => {
     const userId = req.headers.userid;
     const isValidCustomer = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
-    if (isValidCustomer === false) {
+    if (!isValidCustomer) {
         return res.status(400).send("l'id du customer n'est pas valide");
     }
     const customer = await Customer.findById(id);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const customerToFind = await Customer.findById(userId);
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
@@ -238,7 +208,7 @@ const getOneCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkCustomer === true || checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkCustomer || checkAdvisor || checkManager || checkDirector && isValidUser) {
             return Customer.findById(id)
             .populate('advisorId', 'firstname lastname')
             .then((customerFound) => {
@@ -265,11 +235,11 @@ const putCustomer = async (req, res) => {
     if(advisorId) criteria.advisorId = advisorId;
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidCustomer = mongoose.isValidObjectId(id);
-    if (isValidCustomer === false) {
+    if (!isValidCustomer) {
         return res.status(400).send("l'id du customer n'est pas valide !");
     }
     const customer = await Customer.findById(id);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
@@ -297,7 +267,7 @@ const putCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
             return Customer.findByIdAndUpdate(id, criteria)
             .then((customerUpdated) => {
                 return res.status(201).send(customerUpdated);
@@ -318,11 +288,11 @@ const deleteOneCustomer = async (req, res) => {
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidCustomer = mongoose.isValidObjectId(id);
-    if (isValidCustomer === false) {
+    if (!isValidCustomer) {
         return res.status(400).send("l'id du customer n'est pas valide");
     }
     const customer = await Customer.findById(id);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const advisor = await Advisor.findById(userId);
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
@@ -350,7 +320,7 @@ const deleteOneCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor === true || checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
             return Customer.findByIdAndDelete(id)
             .then(() => {
                 return res.send(`Customer ${customer.firstname} ${customer.lastname} has been deleted.`);

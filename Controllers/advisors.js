@@ -35,7 +35,7 @@ const createAdvisor = async (req, res) => {
         managerId: req.body.managerId,
         creationDate: Date.now()
     })
-    if (isValidUser === true) {
+    if (isValidUser) {
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
         let checkManager;
@@ -59,7 +59,7 @@ const createAdvisor = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkManager || checkDirector && isValidUser) {
             newAdvisor.save()
             .then((newAdvisorCreated) => {
                 return res.status(201).send(newAdvisorCreated);
@@ -78,7 +78,7 @@ const createAdvisor = async (req, res) => {
 const getAdvisors = async (req, res) => {
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
         let checkManager;
@@ -97,7 +97,7 @@ const getAdvisors = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkManager || checkDirector && isValidUser) {
             return Advisor.find()
             .then((advisorsFound) => {
                 return res.send(advisorsFound);
@@ -118,11 +118,11 @@ const getOneAdvisor = async (req, res) => {
     const userId = req.headers.userid;
     const isValidAdvisor = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
-    if (isValidAdvisor === false) {
+    if (!isValidAdvisor) {
         return res.status(400).send("l'id de l'advisor n'est pas valide");
     }
     const advisor = await Advisor.findById(id);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
         let checkManager;
@@ -141,7 +141,7 @@ const getOneAdvisor = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkManager || checkDirector && isValidUser) {
             return Advisor.findById(id)
             .populate('managerId', 'firstname lastname')
             .then((advisorFound) => {
@@ -164,11 +164,11 @@ const putAdvisor = async (req, res) => {
     const manager_id = req.body.managerId;
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidAdvisor = mongoose.isValidObjectId(id);
-    if (isValidAdvisor === false) {
+    if (!isValidAdvisor) {
         return res.status(400).send("l'id de l'advisor n'est pas valide !");
     }
     const advisor = await Advisor.findById(id);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
         let checkManager;
@@ -187,7 +187,7 @@ const putAdvisor = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkManager || checkDirector && isValidUser) {
             return Advisor.findByIdAndUpdate(id, { managerId: manager_id })
             .then((advisorUpdated) => {
                 return res.status(201).send(advisorUpdated);
@@ -208,11 +208,11 @@ const deleteOneAdvisor = async (req, res) => {
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidAdvisor = mongoose.isValidObjectId(id);
-    if (isValidAdvisor === false) {
+    if (!isValidAdvisor) {
         return res.status(400).send("l'id de l'advisor n'est pas valide");
     }
     const advisor = await Advisor.findById(id);
-    if (isValidUser === true) {
+    if (isValidUser) {
         const manager = await Manager.findById(userId);
         const director = await Director.findById(userId);
         let checkManager;
@@ -231,7 +231,7 @@ const deleteOneAdvisor = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkManager === true || checkDirector === true && isValidUser === true) {
+        if (checkManager || checkDirector && isValidUser) {
             return Advisor.findByIdAndDelete(id)
             .then(() => {
                 return res.send(`Advisor ${advisor.firstname} ${advisor.lastname} has been deleted !`);
