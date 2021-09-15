@@ -11,7 +11,31 @@ const checkAdvisorId = (advisor_id, customer_id) => {
         else return false;
     })
 }
-const checkManagerId = async (manager_id, advisor_id) => {
+const checkManagerId = async (manager_id, customer) => {
+    let result = 0;
+    let validate = false;
+    let customersFound = [];
+    let advisorsFound = await Advisor.find({ managerId: manager_id });
+  
+    for (let i = 0; i < advisorsFound.length; i++) {
+        const element = advisorsFound[i];
+        let customer_found = await Customer.find({ advisorId: element._id });
+        customersFound.push(customer_found);
+    }
+    customersFound.forEach(element => {
+        element.forEach(el => {
+            console.log(customer);
+            console.log(el._id);
+            if (customer._id.toString() === el._id.toString()) {
+                result +=1;
+                if (result === 1) validate = true;
+            }
+        })
+    })
+    return validate;
+}
+
+const checkManagerToCreate = async (manager_id, advisor_id) => {
     return Advisor.findOne({ managerId: manager_id, _id: advisor_id })
     .then((advisor) => {
         if(advisor) return true;
@@ -73,7 +97,7 @@ const createCustomer = async (req, res) => {
         }
         if (manager) {
             try{
-                    checkManager = await checkManagerId(manager._id, newCustomer.advisorId);
+                    checkManager = await checkManagerToCreate(manager._id, newCustomer.advisorId);
                 }
             catch (error) {
                 return res.status(500).send(error + '');
