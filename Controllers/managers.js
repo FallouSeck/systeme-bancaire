@@ -1,18 +1,32 @@
 const Manager = require('../Models/Manager');
+const Director = require('../Models/Director');
+const mongoose = require('mongoose');
 
-const createManager = (req, res) => {
+
+const createManager = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     const newManager = new Manager({
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         creationDate: Date.now()
     })
-    newManager.save()
-    .then((newManagerCreated) => {
-        return res.status(201).send(newManagerCreated);
-    })
-    .catch((error) => {
-        return res.status(500).send(error);
-    })
+    if(isValidUser) {
+    const director = await Director.findById(userId);
+        if(director) {
+            newManager.save()
+            .then((newManagerCreated) => {
+                return res.status(201).send(newManagerCreated);
+            })
+            .catch((error) => {
+                return res.status(500).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have permission to create new manager !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const getManagers = (req, res) => {
