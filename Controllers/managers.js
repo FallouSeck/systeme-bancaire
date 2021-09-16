@@ -50,12 +50,27 @@ const getOneManager = (req, res) => {
     })
 }
 
-const deleteManager = (req, res) => {
+const deleteManager = async (req, res) => {
     const id = req.params.id;
-    return Manager.findByIdAndDelete(id)
-    .then((managerToDelete) => {
-        return res.send(`Manager ${managerToDelete.firstname} ${managerToDelete.lastname} has been deleted !`);
-    })
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
+    const isValidManager = mongoose.isValidObjectId(id);
+    if (!isValidManager) {
+        return res.status(400).send("l'id du manager n'est pas valide");
+    }
+    if(isValidUser){ 
+        const director = await Director.findById(userId);
+        if(director) {
+            return Manager.findByIdAndDelete(id)
+            .then((managerToDelete) => {
+                return res.send(`Manager ${managerToDelete.firstname} ${managerToDelete.lastname} has been deleted !`);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this manager\'s data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 module.exports = {
