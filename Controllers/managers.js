@@ -29,14 +29,25 @@ const createManager = async (req, res) => {
     }
 }
 
-const getManagers = (req, res) => {
-    return Manager.find()
-    .then((managersFound) => {
-        return res.send(managersFound);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+const getManagers = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
+    if (isValidUser) {
+        const director = await Director.findById(userId);
+        if (director) {
+            return Manager.find()
+            .then((managersFound) => {
+                return res.send(managersFound);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to the managers data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const getOneManager = async (req, res) => {
