@@ -39,15 +39,31 @@ const getManagers = (req, res) => {
     })
 }
 
-const getOneManager = (req, res) => {
+const getOneManager = async (req, res) => {
     const id = req.params.id;
-    return Manager.findById(id)
-    .then((managerFound) => {
-        return res.send(managerFound);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
+    const isValiManager = mongoose.isValidObjectId(id);
+    if (!isValiManager) {
+        return res.status(400).send("l'id du manager n'est pas valide");
+    }
+    if(isValidUser){ 
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        if(director || manager._id.toString() === id) {
+            return Manager.findById(id)
+            .then((managerFound) => {
+                return res.send(managerFound);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to this manager\'s data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const deleteManager = async (req, res) => {
