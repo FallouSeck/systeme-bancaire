@@ -1,18 +1,31 @@
 const Director = require('../Models/Director');
+const mongoose = require('mongoose');
 
-const createDirector = (req, res) => {
+
+const createDirector = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     const newDirector = new Director({
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         creationDate: Date.now()
     })
-    newDirector.save()
-    .then((newDirectorCreated) => {
-        return res.status(201).send(newDirectorCreated);
-    })
-    .catch((error) => {
-        return res.status(500).send(error);
-    })
+    if (isValidUser) {
+    const director = await Director.findById(userId);
+        if (director) {
+            newDirector.save()
+            .then((newDirectorCreated) => {
+                return res.status(201).send(newDirectorCreated);
+            })
+            .catch((error) => {
+                return res.status(500).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have permission to create new director !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const getDirector = (req, res) => {
