@@ -51,12 +51,27 @@ const getDirector = async (req, res) => {
 
 
 
-const deleteDirector = (req, res) => {
+const deleteDirector = async (req, res) => {
     const id = req.params.id;
-    return Director.findByIdAndDelete(id)
-    .then((directorToDelete) => {
-        return res.send(`Director ${directorToDelete.firstname} ${directorToDelete.lastname} has been deleted !`);
-    })
+    const userId = req.headers.userid;
+    const isValiDirector = mongoose.isValidObjectId(id);
+    const isValidUser = mongoose.isValidObjectId(userId);
+    if (!isValiDirector) {
+        return res.status(400).send("l'id du director n'est pas valide");
+    }
+    if (isValidUser) {
+        const director = await Director.findById(userId);
+        if (director) {
+            return Director.findByIdAndDelete(id)
+            .then((directorToDelete) => {
+                return res.send(`Director ${directorToDelete.firstname} ${directorToDelete.lastname} has been deleted !`);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to the director data !');
+        } 
+    }else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 module.exports = {
