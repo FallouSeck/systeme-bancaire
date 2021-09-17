@@ -113,7 +113,6 @@ const createCustomer = async (req, res) => {
         if (checkAdvisor || checkManager || checkDirector && isValidUser) {
             return newCustomer.save()
             .then((savedCustomer) => {
-                console.log('Successful !');
                 return res.status(201).send(savedCustomer);
             })
             .catch((error) => {

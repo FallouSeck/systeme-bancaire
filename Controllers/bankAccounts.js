@@ -29,7 +29,6 @@ const checkManagerId = async (manager_id, account) => {
     let customersFound = [];
     let bankAccountsFound = [];
     let advisorsFound = await Advisor.find({ managerId: manager_id });
-  
     for (let i = 0; i < advisorsFound.length; i++) {
         const element = advisorsFound[i];
         let customer = await Customer.find({ advisorId: element._id });
@@ -44,10 +43,9 @@ const checkManagerId = async (manager_id, account) => {
             bankAccountsFound.push(bankAccount);
         }
     }
-
     bankAccountsFound.forEach(element => {
         element.forEach(el => {
-            if (account._id.toString() === el._id.toString()) {
+            if (account.toString() === el.customerId.toString()) {
                 result += 1;
                 if (result === 1) validate = true;
             }
@@ -64,29 +62,68 @@ const checkDirectorId = (director_id) => {
 }
 
 async function createBankAccount (req, res) {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     let result;
     try {
         result = await findInTheDatabase(req.body.customerId, req.body.type);
     } catch (error) {
         return res.status(500).send(error);        
-    };
-    if(result === false){
-            const newAccount = new BankAccount({
-                type: req.body.type,
-                customerId: req.body.customerId,
-                amount: req.body.amount,
-                creationDate: Date.now()
-            })
-            return newAccount.save()
-            .then((savedAccount) => {
-                return res.status(201).send(savedAccount);
-            })
-            .catch((error) => {
-                return res.status(500).send(error);
-            });
+    }
+    if(!result){
+        const newAccount = new BankAccount({
+            type: req.body.type,
+            customerId: req.body.customerId,
+            amount: req.body.amount,
+            creationDate: Date.now()
+        })
+        if (isValidUser) {
+            const advisor = await Advisor.findById(userId);
+            const manager = await Manager.findById(userId);
+            const director = await Director.findById(userId);
+            let checkAdvisor;
+            let checkManager;
+            let checkDirector;
+            if (advisor) {
+                try{
+                    checkAdvisor = await checkAdvisorId(advisor._id, newAccount.customerId)
+                } catch (error) {
+                    return res.status(500).send(error + '');
+                }
+            }
+            if (manager) {
+                try{
+                    checkManager = await checkManagerId(manager._id, newAccount.customerId);
+                    console.log(checkManager);
+                }
+                catch (error) {
+                    return res.status(500).send(error + '');
+                }
+            }
+            if (director) {
+                try {
+                    checkDirector = await checkDirectorId(director._id);
+                } catch (error) {
+                    return res.status(500).send(error);
+                }
+            }
+            if (checkAdvisor || checkManager || checkDirector && isValidUser) {
+                return newAccount.save()
+                .then((savedAccount) => {
+                    return res.status(201).send(savedAccount);
+                })
+                .catch((error) => {
+                    return res.status(500).send(error);
+                });
+            } else {
+                return res.status(403).send('You don\'t have permission to create new bankAccount to this cutomer!');
+            }
         } else {
-            return res.status(400).send(`Customers can only have 1 ${req.body.type} account.`); 
+            return res.status(400).send("Le userId saisi n'est pas valide !");
         }
+    } else {
+        return res.status(400).send(`Customers can only have 1 ${req.body.type} account.`); 
+    }
 }
 
 const getBankAccounts = async (req, res) => {
@@ -161,7 +198,7 @@ const getOneBankAccount = async (req, res) => {
         }
         if (manager) {
             try{
-                checkManager = await checkManagerId(manager._id, account);
+                checkManager = await checkManagerId(manager._id, account.customerId);
             } catch (error) {
                 return res.status(500).send(error);
             }
@@ -227,7 +264,7 @@ const putBankAccount = async (req, res) => {
         //On verifie si le user est un manager et qu'il s'agit bien du manager de l'advisor du customer de ce compte
         if (manager) {
             try{
-                checkManager = await checkManagerId(manager._id, account);
+                checkManager = await checkManagerId(manager._id, account.customerId);
             } catch (error) {
                 return res.status(500).send(error);
             }
@@ -281,7 +318,8 @@ const deleteBankAccount = async (req, res) => {
         }
         if (manager) {
             try{
-                checkManager = await checkManagerId(manager._id, account);
+                console.log(account);
+                checkManager = await checkManagerId(manager._id, account.customerId);
             } catch (error) {
                 return res.status(500).send(error);
             }
