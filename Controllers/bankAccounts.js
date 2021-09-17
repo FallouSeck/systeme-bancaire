@@ -89,7 +89,9 @@ async function createBankAccount (req, res) {
         }
 }
 
-const getBankAccounts = (req, res) => {
+const getBankAccounts = async (req, res) => {
+    const userId = req.headers.userid;
+    const isValidUser = mongoose.isValidObjectId(userId);
     let criteria = {};
     const type = req.query.type;
     const customerId = req.query.customerId;
@@ -107,13 +109,24 @@ const getBankAccounts = (req, res) => {
     if (beforeDate) {
         criteria.creationDate = { $lte: beforeDate };
     }
-    return BankAccount.find(criteria)
-    .then((bankAccounts) => {
-        return res.send(bankAccounts);
-    })
-    .catch((error) => {
-        return res.status(400).send(error);
-    })
+    if (isValidUser) {
+        const advisor = await Advisor.findById(userId);
+        const manager = await Manager.findById(userId);
+        const director = await Director.findById(userId);
+        if (advisor || manager || director && isValidUser) {
+            return BankAccount.find(criteria)
+            .then((bankAccounts) => {
+                return res.send(bankAccounts);
+            })
+            .catch((error) => {
+                return res.status(400).send(error);
+            })
+        } else {
+            return res.status(403).send('You don\'t have access to the bank account\'s data !');
+        }
+    } else {
+        return res.status(400).send("le userId saisi n'est pas valide !");
+    }
 }
 
 const getOneBankAccount = async (req, res) => {
