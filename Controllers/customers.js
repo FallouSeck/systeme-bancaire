@@ -89,7 +89,7 @@ const createCustomer = async (req, res) => {
                     checkAdvisor = true;
                 } else {
                     checkAdvisor = false;
-                    return res.status(403).send('You only can create a subordinate customer !');
+                    return res.status(403).send('You can only create a customer that you manage !');
                 }
             } catch (error) {
                 return res.status(500).send(error + '');
@@ -119,10 +119,10 @@ const createCustomer = async (req, res) => {
                 return res.status(500).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have permission to create new customer !');
+            return res.status(403).send('You\'re not allowed to create new customer !');
         }
     } else {
-        return res.status(400).send("Le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -176,10 +176,10 @@ const getCustomers = async (req, res) => {
                 return res.status(400).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have access to the customers data !');
+            return res.status(403).send('You don\'t have access to this customer\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -189,7 +189,7 @@ const getOneCustomer = async (req, res) => {
     const isValidCustomer = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
     if (!isValidCustomer) {
-        return res.status(400).send("l'id du customer n'est pas valide");
+        return res.status(400).send("Customer ID is not valid !");
     }
     const customer = await Customer.findById(id);
     if (isValidUser) {
@@ -244,7 +244,7 @@ const getOneCustomer = async (req, res) => {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -259,7 +259,7 @@ const putCustomer = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidCustomer = mongoose.isValidObjectId(id);
     if (!isValidCustomer) {
-        return res.status(400).send("l'id du customer n'est pas valide !");
+        return res.status(400).send("Customer ID is not valid !");
     }
     const customer = await Customer.findById(id);
     if (isValidUser) {
@@ -302,7 +302,7 @@ const putCustomer = async (req, res) => {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -312,7 +312,7 @@ const deleteOneCustomer = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidCustomer = mongoose.isValidObjectId(id);
     if (!isValidCustomer) {
-        return res.status(400).send("l'id du customer n'est pas valide");
+        return res.status(400).send("Customer ID is not valid !");
     }
     const customer = await Customer.findById(id);
     if (isValidUser) {
@@ -355,7 +355,7 @@ const deleteOneCustomer = async (req, res) => {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 module.exports = {
