@@ -116,10 +116,10 @@ async function createBankAccount (req, res) {
                     return res.status(500).send(error);
                 });
             } else {
-                return res.status(403).send('You don\'t have permission to create new bankAccount to this cutomer!');
+                return res.status(403).send('You\'re not allowed to create new bankAccount to this cutomer!');
             }
         } else {
-            return res.status(400).send("Le userId saisi n'est pas valide !");
+            return res.status(400).send("The userId entered is not valid !");
         }
     } else {
         return res.status(400).send(`Customers can only have 1 ${req.body.type} account.`); 
@@ -159,10 +159,10 @@ const getBankAccounts = async (req, res) => {
                 return res.status(400).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have access to the bank account\'s data !');
+            return res.status(403).send('You don\'t have access to this bank account\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userId entered is not valid !");
     }
 }
 
@@ -172,7 +172,7 @@ const getOneBankAccount = async (req, res) => {
     const isValidAccount = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
     if (!isValidAccount) {
-        return res.status(400).send("l'id du compte n'est pas valide");
+        return res.status(400).send("The account ID is not valid !");
     }
     const account = await BankAccount.findById(id);
     if (isValidUser) {
@@ -223,7 +223,7 @@ const getOneBankAccount = async (req, res) => {
             return res.status(403).send('You don\'t have access to this bank account\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -235,7 +235,7 @@ const putBankAccount = async (req, res) => {
     const isValid = mongoose.isValidObjectId(userId);
     const isValidAccount = mongoose.isValidObjectId(id);
     if (!isValidAccount) {
-        return res.status(400).send("l'id du compte n'est pas valide");
+        return res.status(400).send("The account ID is not valid !");
     }
     const account = await BankAccount.findById(id);
     if (isValid) {
@@ -289,7 +289,7 @@ const putBankAccount = async (req, res) => {
             return res.status(403).send('You don\'t have access to this bank account\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -299,7 +299,7 @@ const deleteBankAccount = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidAccount = mongoose.isValidObjectId(id);
     if (!isValidAccount) {
-        return res.status(400).send("l'id du compte n'est pas valide");
+        return res.status(400).send("The account ID is not valid !");
     }
     const account = await BankAccount.findById(id);
     if (isValidUser) {
@@ -343,7 +343,7 @@ const deleteBankAccount = async (req, res) => {
             return res.status(403).send('You don\'t have access to this bank account\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
