@@ -46,7 +46,7 @@ const createAdvisor = async (req, res) => {
                     checkManager = true;
                 } else {
                     checkManager = false;
-                    return res.status(403).send('You only can create a subordinate advisor !');
+                    return res.status(403).send('You can only create an advisor that you manage !');
                 }
             } catch (error) {
                 return res.status(500).send(error);
@@ -68,10 +68,10 @@ const createAdvisor = async (req, res) => {
                 return res.status(500).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have permission to create new advisor !');
+            return res.status(403).send('You\'re not allowed to create new advisor !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -106,10 +106,10 @@ const getAdvisors = async (req, res) => {
                 return res.status(400).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have access to the advisors data !');
+            return res.status(403).send('You don\'t have access to the advisor\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -119,7 +119,7 @@ const getOneAdvisor = async (req, res) => {
     const isValidAdvisor = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
     if (!isValidAdvisor) {
-        return res.status(400).send("l'id de l'advisor n'est pas valide");
+        return res.status(400).send("Advisor ID is not valid !");
     }
     const advisor = await Advisor.findById(id);
     if (isValidUser) {
@@ -154,7 +154,7 @@ const getOneAdvisor = async (req, res) => {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -165,7 +165,7 @@ const putAdvisor = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidAdvisor = mongoose.isValidObjectId(id);
     if (!isValidAdvisor) {
-        return res.status(400).send("l'id de l'advisor n'est pas valide !");
+        return res.status(400).send("Advisor ID is not valid !");
     }
     const advisor = await Advisor.findById(id);
     if (isValidUser) {
@@ -199,7 +199,7 @@ const putAdvisor = async (req, res) => {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -209,7 +209,7 @@ const deleteOneAdvisor = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidAdvisor = mongoose.isValidObjectId(id);
     if (!isValidAdvisor) {
-        return res.status(400).send("l'id de l'advisor n'est pas valide");
+        return res.status(400).send("Advisor ID is not valid !");
     }
     const advisor = await Advisor.findById(id);
     if (isValidUser) {
@@ -243,7 +243,7 @@ const deleteOneAdvisor = async (req, res) => {
             return res.status(403).send('You don\'t have access to this advisor\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 module.exports = {
