@@ -21,10 +21,10 @@ const createDirector = async (req, res) => {
                 return res.status(500).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have permission to create new director !');
+            return res.status(403).send('You\'re not allowed to create new director !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -45,7 +45,7 @@ const getDirector = async (req, res) => {
             return res.status(403).send('You don\'t have access to the director data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -55,7 +55,7 @@ const deleteDirector = async (req, res) => {
     const isValiDirector = mongoose.isValidObjectId(id);
     const isValidUser = mongoose.isValidObjectId(userId);
     if (!isValiDirector) {
-        return res.status(400).send("l'id du director n'est pas valide");
+        return res.status(400).send("Director ID is not valid !");
     }
     if (isValidUser) {
         const director = await Director.findById(userId);
@@ -68,7 +68,7 @@ const deleteDirector = async (req, res) => {
             return res.status(403).send('You don\'t have access to the director data !');
         } 
     }else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
