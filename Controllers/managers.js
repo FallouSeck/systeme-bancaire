@@ -22,10 +22,10 @@ const createManager = async (req, res) => {
                 return res.status(500).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have permission to create new manager !');
+            return res.status(403).send('You\'re not allowed to create new manager !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -43,10 +43,10 @@ const getManagers = async (req, res) => {
                 return res.status(400).send(error);
             })
         } else {
-            return res.status(403).send('You don\'t have access to the managers data !');
+            return res.status(403).send('You don\'t have access to this manager\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -56,7 +56,7 @@ const getOneManager = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValiManager = mongoose.isValidObjectId(id);
     if (!isValiManager) {
-        return res.status(400).send("l'id du manager n'est pas valide");
+        return res.status(400).send("Manager ID is not valid !");
     }
     if(isValidUser){ 
         const manager = await Manager.findById(userId);
@@ -73,7 +73,7 @@ const getOneManager = async (req, res) => {
             return res.status(403).send('You don\'t have access to this manager\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
@@ -83,7 +83,7 @@ const deleteManager = async (req, res) => {
     const isValidUser = mongoose.isValidObjectId(userId);
     const isValidManager = mongoose.isValidObjectId(id);
     if (!isValidManager) {
-        return res.status(400).send("l'id du manager n'est pas valide");
+        return res.status(400).send("Manager ID is not valid !");
     }
     if(isValidUser){ 
         const director = await Director.findById(userId);
@@ -96,7 +96,7 @@ const deleteManager = async (req, res) => {
             return res.status(403).send('You don\'t have access to this manager\'s data !');
         }
     } else {
-        return res.status(400).send("le userId saisi n'est pas valide !");
+        return res.status(400).send("The userID entered is not valid !");
     }
 }
 
