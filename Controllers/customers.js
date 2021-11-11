@@ -130,50 +130,32 @@ const getCustomers = async (req, res) => {
     const userId = req.headers.userid;
     const isValidUser = mongoose.isValidObjectId(userId);
     let criteria = {};
-    // const city = req.query.adress;
-    /*if (city === undefined) {
-        criteria = {};
-        console.log(criteria.city+"-----");
-    } else {
-        console.log(criteria.city+"+++");
-        criteria.city = city ;
+    /*const city = req.query.firstname;
+    if (city) {
+            console.log(criteria.city+"+++");
+            criteria.city = city ;
     }*/
     if (isValidUser) {
-        const advisor = await Advisor.findById(userId);
-        const manager = await Manager.findById(userId);
-        const director = await Director.findById(userId);
-        let checkAdvisor;
-        let checkManager;
-        let checkDirector;
-        if (advisor) {
-            try {
-                checkAdvisor = await checkIfAdvisor(advisor._id);
-            } catch (error) {
-                return res.status(500).send(error);
-            }
+        let advisor;
+        let manager;
+        let director;
+        try {
+            advisor = await Advisor.findById(userId);
+            manager = await Manager.findById(userId);
+            director = await Director.findById(userId);
+        } catch (error) {
+            return res.status(500).send(error);          
         }
-        if (manager) {
-            try{
-                checkManager = await checkIfManager(manager._id);
-            } catch (error) {
-                return res.status(500).send(error);
-            }
-        }
-        if (director) {
-            try {
-                checkDirector = await checkDirectorId(director._id);
-            } catch (error) {
-                return res.status(500).send(error);
-            }
-        }
-        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
+       
+        if (advisor || manager || director) {
             return Customer.find(criteria)
             .then((customers) => {
                 // console.log(customers[3].adress.city);
+                if(!customers) return res.status(404).send([]);
                 return res.send(customers);
             })
             .catch((error) => {
-                return res.status(400).send(error);
+                return res.status(500).send(error);
             })
         } else {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
@@ -191,12 +173,25 @@ const getOneCustomer = async (req, res) => {
     if (!isValidCustomer) {
         return res.status(400).send("Customer ID is not valid !");
     }
-    const customer = await Customer.findById(id);
+    let customer;
+    try {
+        customer = await Customer.findById(id);
+    } catch (error) {
+        return res.status(500).send(error);        
+    }
     if (isValidUser) {
-        const customerToFind = await Customer.findById(userId);
-        const advisor = await Advisor.findById(userId);
-        const manager = await Manager.findById(userId);
-        const director = await Director.findById(userId);
+        let customerToFind;
+        let advisor;
+        let manager;
+        let director;
+        try {
+            customerToFind = await Customer.findById(userId);
+            advisor = await Advisor.findById(userId);
+            manager = await Manager.findById(userId);
+            director = await Director.findById(userId);
+        } catch (error) {
+            return res.status(500).send(error);
+        }
         let checkCustomer;
         let checkAdvisor;
         let checkManager;
@@ -231,7 +226,7 @@ const getOneCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkCustomer || checkAdvisor || checkManager || checkDirector && isValidUser) {
+        if (checkCustomer || checkAdvisor || checkManager || checkDirector) {
             return Customer.findById(id)
             .populate('advisorId', 'firstname lastname')
             .then((customerFound) => {
@@ -263,9 +258,16 @@ const putCustomer = async (req, res) => {
     }
     const customer = await Customer.findById(id);
     if (isValidUser) {
-        const advisor = await Advisor.findById(userId);
-        const manager = await Manager.findById(userId);
-        const director = await Director.findById(userId);
+        let advisor;
+        let manager;
+        let director;
+        try {
+            advisor = await Advisor.findById(userId);
+            manager = await Manager.findById(userId);
+            director = await Director.findById(userId);
+        } catch (error) {
+            return res.status(500).send(error);            
+        }
         let checkAdvisor;
         let checkManager;
         let checkDirector;
@@ -290,13 +292,13 @@ const putCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
+        if (checkAdvisor || checkManager || checkDirector) {
             return Customer.findByIdAndUpdate(id, criteria)
             .then((customerUpdated) => {
-                return res.status(201).send(customerUpdated);
+                return res.status(200).send(customerUpdated);
             })
             .catch((error) => {
-                return res.status(400).send(error);
+                return res.status(500).send(error);
             })
         } else {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
@@ -316,9 +318,16 @@ const deleteOneCustomer = async (req, res) => {
     }
     const customer = await Customer.findById(id);
     if (isValidUser) {
-        const advisor = await Advisor.findById(userId);
-        const manager = await Manager.findById(userId);
-        const director = await Director.findById(userId);
+        let advisor;
+        let manager;
+        let director;
+        try {
+            advisor = await Advisor.findById(userId);
+            manager = await Manager.findById(userId);
+            director = await Director.findById(userId);
+        } catch (error) {
+            return res.status(500).send(error);
+        }
         let checkAdvisor;
         let checkManager;
         let checkDirector;
@@ -343,13 +352,13 @@ const deleteOneCustomer = async (req, res) => {
                 return res.status(500).send(error);
             }
         }
-        if (checkAdvisor || checkManager || checkDirector && isValidUser) {
+        if (checkAdvisor || checkManager || checkDirector) {
             return Customer.findByIdAndDelete(id)
             .then(() => {
                 return res.send(`Customer ${customer.firstname} ${customer.lastname} has been deleted.`);
             })
             .catch((error) => {
-                return res.status(400).send(error);
+                return res.status(500).send(error);
             })
         } else {
             return res.status(403).send('You don\'t have access to this customer\'s data !');
